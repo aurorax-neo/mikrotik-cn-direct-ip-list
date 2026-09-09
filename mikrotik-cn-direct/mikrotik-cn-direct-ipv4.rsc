@@ -1,6 +1,6 @@
 # China mainland direct IP address list for MikroTik RouterOS
 # Source: https://github.com/appshubcc/bett-rules
-# Upstream: meta/geo/geoip/cn.list
+# Upstream file: meta/geo/geoip/cn.list
 # IPv4 prefixes: 7162
 # Address-list name: CN-DIRECT
 # Import with: /import file-name=<this-file>.rsc

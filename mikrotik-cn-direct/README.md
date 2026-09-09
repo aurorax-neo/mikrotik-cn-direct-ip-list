@@ -5,13 +5,48 @@
 ## 文件
 
 - `mikrotik-cn-direct-ipv4.rsc`：仅 IPv4，推荐用于大多数网络。
-- `mikrotik-cn-direct-ipv4-ipv6.rsc`：IPv4 + IPv6，适合已启用 IPv6 的 RouterOS。
+- `mikrotik-cn-direct-ipv6.rsc`：仅 IPv6。
+- `mikrotik-cn-direct-all.rsc`：IPv4 + IPv6，合并为一个文件，推荐一次性导入。
+- `mikrotik-cn-direct-ipv4-ipv6.rsc`：IPv4 + IPv6，兼容旧文件名。
 - `cn-ipv4.txt` / `cn-ipv6.txt`：纯 CIDR 列表。
 - `cn-source.list`：上游原始列表。
+- `update.sh`：通过代理拉取最新数据并重新生成全部导入文件。
 
 导入后创建的 address-list 名称为：`CN-DIRECT`。
 
 > 注意：每次导入 `.rsc` 文件时，会先删除现有的同名 `CN-DIRECT` address-list，然后写入最新版列表。请勿把自己的条目混在这个列表中。
+
+## 更新数据
+
+运行脚本会从上游重新下载 CIDR 数据，并更新 `cn-source.list`、IPv4/IPv6 列表及所有 `.rsc` 文件。下载失败时不会覆盖现有文件。
+
+使用 HTTP 代理：
+
+```bash
+./update.sh --proxy http://127.0.0.1:7890
+```
+
+使用 SOCKS5 代理：
+
+```bash
+./update.sh --proxy socks5h://127.0.0.1:7890
+```
+
+也可以通过环境变量传入代理，适合定时任务：
+
+```bash
+PROXY_URL=http://127.0.0.1:7890 ./update.sh
+```
+
+如需替换数据源，同时指定 `--source`：
+
+```bash
+./update.sh \
+  --proxy http://127.0.0.1:7890 \
+  --source https://cdn.jsdelivr.net/gh/appshubcc/bett-rules@meta/geo/geoip/cn.list
+```
+
+脚本依赖 `curl` 和 `python3`，支持 `http://`、`https://`、`socks5h://` 等 curl 代理协议。
 
 ## 导入方法
 
@@ -22,10 +57,16 @@
 /import file-name=mikrotik-cn-direct-ipv4.rsc
 ```
 
-如需 IPv6：
+仅导入 IPv6：
 
 ```routeros
-/import file-name=mikrotik-cn-direct-ipv4-ipv6.rsc
+/import file-name=mikrotik-cn-direct-ipv6.rsc
+```
+
+一次性导入 IPv4 + IPv6：
+
+```routeros
+/import file-name=mikrotik-cn-direct-all.rsc
 ```
 
 检查导入结果：
